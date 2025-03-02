@@ -4,6 +4,7 @@ from django.contrib import auth
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -55,6 +56,8 @@ class LoginSerializer(serializers.Serializer):
         if not user.is_active:
             raise AuthenticationFailed('Account disabled, contact admin')
 
+        user.last_login = timezone.now()
+        user.save()
         return user  # Retornamos el usuario directamente
 
 class LogoutSerializer(serializers.Serializer):
