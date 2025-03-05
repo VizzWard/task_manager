@@ -1,6 +1,8 @@
 from rest_framework import serializers
+from django.utils import timezone
 
 from .models import TagsUser, Tasks, Comments
+from users.models import User
 
 class TagsUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -58,3 +60,8 @@ class CommentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comments
         fields = ['id', 'comment', 'created_at']
+
+def last_login(id):
+    user = User.objects.filter(id=id).first()
+    user.last_login = timezone.now()
+    user.save()

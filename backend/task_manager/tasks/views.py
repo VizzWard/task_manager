@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 
 
 from .models import TagsUser, Tasks, Comments
-from .serializers import TagsUserSerializer, TasksSerializer, CommentsSerializer, GetTasksSerializer
+from .serializers import TagsUserSerializer, TasksSerializer, CommentsSerializer, GetTasksSerializer, last_login
 from .pagination import CustomTasksLimitOffsetPagination
 
 # Create your views here.
@@ -19,6 +19,7 @@ class CreateTaskUser(generics.CreateAPIView):
     def post(self, request):
         # Obtener el usuario autenticado
         user = request.user
+        last_login(user.id)
 
         # Obtener los datos de la petición
         task_name = request.data.get('task_name') # Requerido
@@ -64,6 +65,7 @@ class GetTaskDetails(GenericAPIView):
 
     def get(self, request, id=None):
         user = request.user
+        last_login(user.id)
 
         task = get_object_or_404(Tasks, id=id, user=user)
 
@@ -82,6 +84,7 @@ class ListTasksActive(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        last_login(user.id)
         show_all = self.request.query_params.get('all', None)
         tag_name = self.request.query_params.get('tag_name', None)
         priority = self.request.query_params.get('priority', None)
@@ -110,6 +113,7 @@ class UpdateTask(GenericAPIView):
 
     def patch(self, request, id=None):
         user = request.user
+        last_login(user.id)
 
         # 🔍 Buscar la tarea y validar que le pertenece al usuario
         task = get_object_or_404(Tasks, id=id, user=user)
@@ -149,6 +153,7 @@ class UpdateTask(GenericAPIView):
 
     def delete(self, request, id=None):
         user = request.user
+        last_login(user.id)
 
         # 🔍 Buscar la tarea y validar que le pertenece al usuario
         task = get_object_or_404(Tasks, id=id, user=user)
@@ -164,6 +169,7 @@ class AddCommentView(GenericAPIView):
 
     def post(self, request, id=None):
         user = request.user
+        last_login(user.id)
 
         # 🔍 Buscar la tarea y validar que le pertenece al usuario
         task = get_object_or_404(Tasks, id=id, user=user)
@@ -182,6 +188,7 @@ class ViewCommentsTask(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        last_login(user.id)
         id = self.kwargs['id']
 
         return Comments.objects.filter(task=id, user=user)
@@ -192,6 +199,7 @@ class UpdateCommentView(GenericAPIView):
 
     def patch (self, request, task=None, id=None):
         user = request.user
+        last_login(user.id)
 
         # 🔍 Buscar el comentario y validar que le pertenece al usuario
         comment = get_object_or_404(Comments, id=id, task=task, user=user)
@@ -206,6 +214,7 @@ class UpdateCommentView(GenericAPIView):
 
     def delete(self, request, task=None, id=None):
         user = request.user
+        last_login(user.id)
 
         # 🔍 Buscar el comentario y validar que le pertenece al usuario
         comment = get_object_or_404(Comments, id=id, task=task, user=user)

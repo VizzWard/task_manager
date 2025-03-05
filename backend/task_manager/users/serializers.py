@@ -56,8 +56,8 @@ class LoginSerializer(serializers.Serializer):
         if not user.is_active:
             raise AuthenticationFailed('Account disabled, contact admin')
 
-        user.last_login = timezone.now()
-        user.save()
+        last_login(user)
+
         return user  # Retornamos el usuario directamente
 
 class LogoutSerializer(serializers.Serializer):
@@ -76,3 +76,7 @@ class UserSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserSettings
         fields = '__all__'
+
+def last_login(user):
+    user.last_login = timezone.now()
+    user.save()
