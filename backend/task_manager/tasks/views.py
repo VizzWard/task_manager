@@ -8,13 +8,15 @@ from django.shortcuts import get_object_or_404
 
 
 from .models import TagsUser, Tasks, Comments
-from .serializers import TagsUserSerializer, TasksSerializer, CommentsSerializer, GetTasksSerializer, last_login
+from .serializers import TasksSerializer, CommentsSerializer, GetTasksSerializer, last_login
 from .pagination import CustomTasksLimitOffsetPagination
+from .throttling import *
 
 # Create your views here.
 class CreateTaskUser(generics.CreateAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = TasksSerializer
+    throttle_classes = [CreateTaskLimiting]
 
     def post(self, request):
         # Obtener el usuario autenticado
@@ -62,6 +64,7 @@ class CreateTaskUser(generics.CreateAPIView):
 class GetTaskDetails(GenericAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = TasksSerializer
+    throttle_classes = [DetailTaskLLimiting]
 
     def get(self, request, id=None):
         user = request.user
@@ -77,6 +80,7 @@ class ListTasksActive(ListAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = GetTasksSerializer
     pagination_class = CustomTasksLimitOffsetPagination
+    throttle_classes = [ViewTasksLimiting]
 
     filter_backends = (OrderingFilter,)
     ordering_fields = ['name', 'created_at', 'progress', 'start_date', 'end_date']  # Los campos que se pueden ordenar
@@ -110,6 +114,7 @@ class ListTasksActive(ListAPIView):
 class UpdateTask(GenericAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = TasksSerializer
+    throttle_classes = [UpdateTaskLLimiting]
 
     def patch(self, request, id=None):
         user = request.user
@@ -166,6 +171,7 @@ class UpdateTask(GenericAPIView):
 class AddCommentView(GenericAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = CommentsSerializer
+    throttle_classes = [CreateCommentLimiting]
 
     def post(self, request, id=None):
         user = request.user
@@ -185,6 +191,7 @@ class AddCommentView(GenericAPIView):
 class ViewCommentsTask(generics.ListAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = CommentsSerializer
+    throttle_classes = [ViewCommentsLimiting]
 
     def get_queryset(self):
         user = self.request.user
@@ -196,6 +203,7 @@ class ViewCommentsTask(generics.ListAPIView):
 class UpdateCommentView(GenericAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = CommentsSerializer
+    throttle_classes = [UpdateCommentLimiting]
 
     def patch (self, request, task=None, id=None):
         user = request.user
